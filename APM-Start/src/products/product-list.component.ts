@@ -1,12 +1,29 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import { IProduct } from './product';
 
 @Component({
     selector: 'pm-products',
-    templateUrl: './product-list.component.html'
+    templateUrl: './product-list.component.html',
+    styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent {
+export class ProductListComponent implements OnInit{
     pageTitle: string = 'Our Product List';
-    products: any[] =
+    //below we will set the image size by usign widdth adn margin
+    imageWidth: number = 50;
+    imageMargin: number = 2;
+    showImage: boolean = false;
+    //listFilter: string = 'claw';  //going to remove this and use a getter and setter so we can do filters
+    _listFilter: string;
+    get listFilter(): string {
+        return this._listFilter
+    }
+    set listFilter(value: string) {
+        this._listFilter = value;
+        this.filteredProducts= this.listFilter ? this.performFilter(this.listFilter): this.products;
+    }
+    filteredProducts: IProduct[];
+    //products: any[] =  -- used if i didnt have a Product Interface
+    products: IProduct[] =
     [
         {
             "productId": 1,
@@ -38,5 +55,24 @@ export class ProductListComponent {
             "starRating": 4.8,
             "imageUrl": "http://openclipart.org/image/300px/svg_to_png/73/rejon_Hammer.png"
         }
-    ]
+    ];
+
+    constructor() {
+        this.filteredProducts = this.products;
+        this.listFilter = 'cart';
+    }
+
+    performFilter(filterBy: string): IProduct[] {
+        filterBy = filterBy.toLocaleLowerCase();
+        return this.products.filter(( product: IProduct) =>
+        product.productName.toLocaleLowerCase().indexOf(filterBy) !== -1)
+    }
+
+    toggleImage(): void{
+        this.showImage = !this.showImage;
+    }
+
+    ngOnInit(): void {
+        console.log('In OnInit Method');
+    }
 }
