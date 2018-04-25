@@ -1,5 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { IProduct } from './product';
+import { ProductService } from './product.service';
+import { ProductServiceV2 } from './product.service.v2';
 
 @Component({
     selector: 'pm-products',
@@ -12,6 +14,7 @@ export class ProductListComponent implements OnInit{
     imageWidth: number = 50;
     imageMargin: number = 2;
     showImage: boolean = false;
+    errorMessage: string;
     //listFilter: string = 'claw';  //going to remove this and use a getter and setter so we can do filters
     _listFilter: string;
     get listFilter(): string {
@@ -19,47 +22,21 @@ export class ProductListComponent implements OnInit{
     }
     set listFilter(value: string) {
         this._listFilter = value;
-        this.filteredProducts= this.listFilter ? this.performFilter(this.listFilter): this.products;
+        this.filteredProducts= this.listFilter ? this.performFilter(this.listFilter): this.products; //the this.products is the property below on line 28 which is populated by the onInit 
+        //which ultimately is called in line 54
     }
     filteredProducts: IProduct[];
     //products: any[] =  -- used if i didnt have a Product Interface
-    products: IProduct[] =
-    [
-        {
-            "productId": 1,
-            "productName": "Leaf Rake",
-            "productCode": "GDN-0011",
-            "releaseDate": "March 19, 2016",
-            "description": "Leaf rake with 48-inch wooden handle.",
-            "price": 19.95,
-            "starRating": 3.2,
-            "imageUrl": "http://openclipart.org/image/300px/svg_to_png/26215/Anonymous_Leaf_Rake.png"
-        },
-        {
-            "productId": 2,
-            "productName": "Garden Cart",
-            "productCode": "GDN-0023",
-            "releaseDate": "March 18, 2016",
-            "description": "15 gallon capacity rolling garden cart",
-            "price": 32.99,
-            "starRating": 4.2,
-            "imageUrl": "http://openclipart.org/image/300px/svg_to_png/58471/garden_cart.png"
-        },
-        {
-            "productId": 5,
-            "productName": "Hammer",
-            "productCode": "TBX-0048",
-            "releaseDate": "May 21, 2016",
-            "description": "Curved claw steel hammer",
-            "price": 8.9,
-            "starRating": 4.8,
-            "imageUrl": "http://openclipart.org/image/300px/svg_to_png/73/rejon_Hammer.png"
-        }
-    ];
+    products: IProduct[] = []; //prior to this empty array I had the list of products hard coded here but I moved this to a product servcies which is now called in the onInit below
 
-    constructor() {
-        this.filteredProducts = this.products;
-        this.listFilter = 'cart';
+    constructor(private _productService: ProductServiceV2) {
+        //this.listFilter = 'cart';
+    }
+
+    //somewhat trivial but we are going to change the Product List header
+    //to show how we can respond to an event in a nested control back to the container
+    onRatingClicked(message: string): void {
+        this.pageTitle = 'Product List: ' + message;
     }
 
     performFilter(filterBy: string): IProduct[] {
@@ -71,8 +48,23 @@ export class ProductListComponent implements OnInit{
     toggleImage(): void{
         this.showImage = !this.showImage;
     }
-
+    /*
     ngOnInit(): void {
+        //often and in this case used for product initialization. I also moved the filter here since onInit is called after the constructor the filter we couldnt have the filter be called there
         console.log('In OnInit Method');
+        this.products = this._productService.getProducts();
+        this.filteredProducts = this.products;
     }
+    */
+   ngOnInit(): void {
+    //often and in this case used for product initialization. I also moved the filter here since onInit is called after the constructor the filter we couldnt have the filter be called there
+    console.log('In OnInit Method');
+    this._productService.getProducts()
+            .subscribe(products => {
+                this.products = products,
+                this.filteredProducts = this.products;
+            },
+                error => this.errorMessage = <any>error);
+    
+}
 }
