@@ -4,7 +4,7 @@ import { ProductService } from './product.service';
 import { ProductServiceV2 } from './product.service.v2';
 
 @Component({
-    selector: 'pm-products',
+    //selector: 'pm-products', //removed because we are going to use routing now
     templateUrl: './product-list.component.html',
     styleUrls: ['./product-list.component.css']
 })
